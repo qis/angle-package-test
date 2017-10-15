@@ -55,7 +55,7 @@ public:
       -0.5f, -0.5f, 0.0f, 0.0f, 1.0f
     };
     glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * sizeof(vertices[0]), vertices, GL_STATIC_DRAW);
 
     // Create elements VBO.
     const unsigned elements[] = {
