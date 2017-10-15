@@ -55,14 +55,14 @@ public:
       -0.5f, -0.5f, 0.0f, 0.0f, 1.0f
     };
     glBindBuffer(GL_ARRAY_BUFFER, vbo_[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * sizeof(vertices[0]), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Create elements VBO.
     const unsigned elements[] = {
       0, 1, 2
     };
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo_[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements) * sizeof(elements[0]), elements, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
     // Add enabled attributes (including their layout information and currently boud buffers) to the VAO.
     glBindVertexArray(vao_[0]);
@@ -85,10 +85,10 @@ public:
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(program_);
     glBindVertexArray(vao_[0]);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    if (const auto ec = gl::error()) {
-      throw gl::system_error(ec, "Could not render frame");
-    }
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+    //if (const auto ec = gl::error()) {
+    //  throw gl::system_error(ec, "Could not render frame");
+    //}
   }
 
 private:

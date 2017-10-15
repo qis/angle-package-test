@@ -21,13 +21,10 @@ private:
   EGLSurface surface_ = EGL_NO_SURFACE;
   EGLContext context_ = EGL_NO_CONTEXT;
 
-  GLsizei samples_ = 1;
+  GLsizei samples_ = 4;
   GLuint rbo_ = 0;
   GLuint fbo_ = 0;
 
   GLsizei cx_ = 1;
   GLsizei cy_ = 1;
-  GLint dpi_ = 96;
-
-  bool resize_ = true;
 };

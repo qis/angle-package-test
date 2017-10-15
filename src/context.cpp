@@ -3,7 +3,7 @@
 #include <egl/eglext.h>
 #include <egl/eglplatform.h>
 #include <egl/error.h>
-#include <gl/error.h>
+#include <chrono>
 
 void context::on_create(GLsizei cx, GLsizei cy, GLint dpi) {
   // Create OpenGL ES display.
@@ -72,29 +72,24 @@ void context::on_create(GLsizei cx, GLsizei cy, GLint dpi) {
     throw egl::system_error(egl::error(), "Could not attach OpenGL ES context");
   }
 
-  // Create render buffer and frame buffer for multisampling.
+  // Create renderbuffer and framebuffer for multisampling.
   if (samples_ > 1) {
+    // Create renderbuffer.
     glGenRenderbuffers(1, &rbo_);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
-    glRenderbufferStorageMultisampleANGLE(GL_RENDERBUFFER, samples_, GL_BGRA8_EXT, cx, cy);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples_, GL_BGRA8_EXT, cx, cy);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    // Create framebuffer and set renderbuffer.
     glGenFramebuffers(1, &fbo_);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, rbo_);
-    if (glGetError()) {
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      glDeleteFramebuffers(1, &fbo_);
-      glBindRenderbuffer(GL_RENDERBUFFER, 0);
-      glDeleteRenderbuffers(1, &rbo_);
-      glGetError();
-      samples_ = 0;
-    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
-
-  // Initialize dpi and size.
-  on_resize(cx, cy, dpi);
 
   // Create scene.
   create(cx, cy, dpi);
+  resize(cx, cy, dpi);
 
   // Show window.
   show(true);
@@ -103,16 +98,25 @@ void context::on_create(GLsizei cx, GLsizei cy, GLint dpi) {
 void context::on_resize(GLsizei cx, GLsizei cy, GLint dpi) {
   cx_ = cx;
   cy_ = cy;
-  dpi_ = dpi;
-  resize_ = true;
+  if (samples_ > 1) {
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo_);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples_, GL_BGRA8_EXT, cx, cy);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glGetError();
+  }
+  resize(cx, cy, dpi);
+  static auto beg = std::chrono::system_clock::now();
+  auto now = std::chrono::system_clock::now();
+  if (now - beg > std::chrono::milliseconds(16)) {
+    on_render();
+    beg = now;
+  }
 }
 
 void context::on_destroy() {
-  // Destroy render buffer and frame buffer.
+  // Destroy framebuffer and renderbuffer.
   if (samples_ > 1) {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDeleteFramebuffers(1, &fbo_);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glDeleteRenderbuffers(1, &rbo_);
   }
 
@@ -133,37 +137,23 @@ void context::on_destroy() {
 }
 
 void context::on_render() {
-  // Resize client.
-  if (resize_) {
-    resize(cx_, cy_, dpi_);
-    if (samples_ > 1) {
-      glRenderbufferStorageMultisampleANGLE(GL_RENDERBUFFER, samples_, GL_BGRA8_EXT, cx_, cy_);
-    }
-    resize_ = false;
-  }
-
   // Set framebuffer when multisampling is enabled.
   if (samples_ > 1) {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_);
   }
 
   // Render scene.
-  if (const auto ec = gl::error()) {
-    throw gl::system_error(ec, "Could not setup frame");
-  }
   render();
 
   // Unset framebuffer when multisampling is enabled.
   if (samples_ > 1) {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo_);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebufferANGLE(0, 0, cx_, cy_, 0, 0, cx_, cy_, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, cx_, cy_, 0, 0, cx_, cy_, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
   }
 
   // Swap buffers.
   eglSwapBuffers(display_, surface_);
-  if (const auto ec = gl::error()) {
-    throw gl::system_error(ec, "Could not finish frame");
-  }
 }
