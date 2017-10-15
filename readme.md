@@ -10,7 +10,7 @@ cd C:\Libraries && git clone https://github.com/qis/angle-package vcpkg
 cd vcpkg && bootstrap-vcpkg.bat && vcpkg integrate install && exit
 ```
 
-Add `C:\Libraries\vcpkg` to the `PATH` environment variable.<br>
+Add `C:\Libraries\vcpkg` and `C:\Libraries\vcpkg\installed\x64-windows\bin` to the `PATH` environment variable.<br>
 Set the `VCPKG` environment variable to `C:/Libraries/vcpkg/scripts/buildsystems/vcpkg.cmake`.<br>
 Set the `VCPKG_DEFAULT_TRIPLET` environment variable to `x64-windows`.<br>
 
