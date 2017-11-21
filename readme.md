@@ -1,12 +1,9 @@
 # Simple OpenGL ES 3.0 Test Project
-This project is designed to test my [angle-package][angle-package] fork of [vcpkg][vcpkg].
-
-## Setup
 The following steps can be used to setup [vcpkg][vcpkg] after installing Visual Studio 2017 and Git.
 
 ```cmd
 mkdir C:\Libraries
-cd C:\Libraries && git clone https://github.com/qis/angle-package vcpkg
+cd C:\Libraries && git clone https://github.com/Microsoft/vcpkg vcpkg
 cd vcpkg && bootstrap-vcpkg.bat && vcpkg integrate install && exit
 ```
 
@@ -19,7 +16,6 @@ vcpkg install angle
 ```
 
 ## Build
-Verify the contents of `solution.cmd`, execute it and build the application.
+Verify the contents of `solution.cmd`, execute it to generate a VS project and build the application.
 
-[angle-package]: https://github.com/qis/angle-package
 [vcpkg]: https://github.com/Microsoft/vcpkg

@@ -35,8 +35,8 @@ add_executable(${PROJECT_NAME} WIN32 ${sources} ${resources} ${CMAKE_CURRENT_BIN
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} src res)
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-find_package(ANGLE REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE ANGLE::EGL ANGLE::GLESv2)
+find_package(unofficial-angle REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::angle::libEGL unofficial::angle::libGLESv2)
 target_compile_definitions(${PROJECT_NAME} PRIVATE EGL_EGLEXT_PROTOTYPES=1 GL_GLEXT_PROTOTYPES=1)
 
 if(MSVC)
